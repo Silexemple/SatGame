@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ Lightning Fighter - Combat Arcade Bitcoin</title>
+    <title>⚡ Lightning Fighter - ULTRA EDITION</title>
     <style>
         * {
             margin: 0;
@@ -13,35 +13,29 @@
 
         body {
             font-family: 'Courier New', monospace;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a0a 100%);
+            background: #000;
             color: #ff6600;
             overflow: hidden;
             height: 100vh;
-            width: 100vw;
-        }
-
-        #game-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
         }
 
         #game-canvas {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            z-index: 0;
         }
 
         #ui-overlay {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none;
             z-index: 10;
+            pointer-events: none;
         }
 
         .screen {
@@ -55,16 +49,13 @@
             align-items: center;
             justify-content: flex-start;
             pointer-events: all;
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
             overflow-y: auto;
-            overflow-x: hidden;
             padding: 20px;
         }
 
-        .screen.hidden {
-            display: none;
-        }
+        .screen.hidden { display: none; }
 
         .screen-content {
             width: 100%;
@@ -76,17 +67,41 @@
         }
 
         .title {
-            font-size: clamp(2rem, 8vw, 4rem);
+            font-size: clamp(2rem, 8vw, 4.5rem);
             font-weight: bold;
-            text-shadow: 0 0 20px #ff6600, 0 0 40px #ff3300;
+            text-shadow: 
+                0 0 10px #ff0000,
+                0 0 20px #ff6600,
+                0 0 30px #ffff00,
+                0 0 40px #ff0000,
+                0 0 50px #ff6600;
             margin: 1rem 0;
-            animation: pulse 2s infinite;
+            animation: rainbow-glow 2s linear infinite;
             text-align: center;
+            letter-spacing: 0.2em;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+        @keyframes rainbow-glow {
+            0% { 
+                filter: hue-rotate(0deg) brightness(1.5);
+                text-shadow: 0 0 20px #ff0000, 0 0 40px #ff6600, 0 0 60px #ffff00;
+            }
+            25% { 
+                filter: hue-rotate(90deg) brightness(1.8);
+                text-shadow: 0 0 20px #00ff00, 0 0 40px #0000ff, 0 0 60px #ff00ff;
+            }
+            50% { 
+                filter: hue-rotate(180deg) brightness(1.5);
+                text-shadow: 0 0 20px #0000ff, 0 0 40px #00ffff, 0 0 60px #ff00ff;
+            }
+            75% { 
+                filter: hue-rotate(270deg) brightness(1.8);
+                text-shadow: 0 0 20px #ff00ff, 0 0 40px #ff0000, 0 0 60px #ffff00;
+            }
+            100% { 
+                filter: hue-rotate(360deg) brightness(1.5);
+                text-shadow: 0 0 20px #ff0000, 0 0 40px #ff6600, 0 0 60px #ffff00;
+            }
         }
 
         .subtitle {
@@ -94,554 +109,403 @@
             margin-bottom: 2rem;
             color: #ffaa00;
             text-align: center;
+            animation: pulse-color 1s infinite;
+        }
+
+        @keyframes pulse-color {
+            0%, 100% { color: #ff6600; }
+            50% { color: #ffff00; }
         }
 
         .btn {
-            padding: 1rem 2rem;
-            font-size: clamp(1rem, 4vw, 1.5rem);
-            background: linear-gradient(135deg, #ff6600 0%, #ff3300 100%);
-            border: 3px solid #ff8800;
+            padding: 1.2rem 2.5rem;
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+            background: linear-gradient(135deg, #ff0000, #ff6600, #ffff00, #ff6600, #ff0000);
+            background-size: 400% 400%;
+            border: 4px solid #ffff00;
             color: white;
             cursor: pointer;
             text-transform: uppercase;
             font-weight: bold;
-            transition: all 0.3s;
-            box-shadow: 0 0 20px rgba(255, 102, 0, 0.5);
             font-family: 'Courier New', monospace;
             margin: 10px;
-            width: auto;
             min-width: 200px;
+            border-radius: 15px;
+            box-shadow: 
+                0 0 30px rgba(255, 255, 0, 0.8),
+                0 0 60px rgba(255, 102, 0, 0.6),
+                inset 0 0 20px rgba(255, 255, 255, 0.3);
+            animation: gradient-shift 3s ease infinite, btn-pulse 1s ease-in-out infinite;
+            transition: all 0.3s;
+        }
+
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes btn-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
         .btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 40px rgba(255, 102, 0, 0.8);
-        }
-
-        .btn:active {
-            transform: scale(0.95);
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .payment-box {
-            background: rgba(255, 102, 0, 0.1);
-            border: 2px solid #ff6600;
-            padding: 1.5rem;
-            margin: 1rem 0;
-            border-radius: 10px;
-            text-align: center;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        #qr-code {
-            background: white;
-            padding: 1rem;
-            border-radius: 10px;
-            margin: 1rem auto;
-            display: inline-block;
-        }
-
-        #qr-code img {
-            display: block;
-            max-width: 100%;
-            height: auto;
-        }
-
-        .status-text {
-            font-size: clamp(0.9rem, 3vw, 1.2rem);
-            color: #ffaa00;
-            margin: 1rem 0;
-            text-align: center;
-        }
-
-        .health-bar-container {
-            position: absolute;
-            top: 20px;
-            width: 40%;
-            max-width: 300px;
-            height: 40px;
-            background: rgba(0, 0, 0, 0.8);
-            border: 3px solid #ff6600;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        #player1-health {
-            left: 10px;
-        }
-
-        #player2-health {
-            right: 10px;
-        }
-
-        .health-bar {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, #00ff00 0%, #ffff00 50%, #ff0000 100%);
-            transition: width 0.3s;
-        }
-
-        .player-name {
-            position: absolute;
-            bottom: 5px;
-            left: 10px;
-            font-size: 0.8rem;
-            color: white;
-            text-shadow: 2px 2px 4px black;
-        }
-
-        .timer {
-            position: absolute;
-            top: 70px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: clamp(2rem, 6vw, 3rem);
-            color: #ff6600;
-            text-shadow: 0 0 20px #ff6600;
-            font-weight: bold;
-        }
-
-        .controls {
-            position: absolute;
-            bottom: 20px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            border: 2px solid #ff6600;
-            padding: 0.5rem;
-            border-radius: 10px;
-            font-size: clamp(0.7rem, 2vw, 0.9rem);
-            max-width: 200px;
-        }
-
-        .controls div {
-            margin: 0.3rem 0;
-        }
-
-        .winner-announcement {
-            font-size: clamp(2.5rem, 10vw, 5rem);
-            color: #ffff00;
-            text-shadow: 0 0 30px #ffff00, 0 0 60px #ff6600;
-            margin: 1rem 0;
-            animation: winner-flash 0.5s infinite;
-            text-align: center;
-        }
-
-        @keyframes winner-flash {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .prize-amount {
-            font-size: clamp(2rem, 6vw, 3rem);
-            color: #00ff00;
-            text-shadow: 0 0 20px #00ff00;
-            margin: 1rem 0;
-            text-align: center;
+            transform: scale(1.15) rotate(2deg);
+            box-shadow: 
+                0 0 50px rgba(255, 255, 0, 1),
+                0 0 80px rgba(255, 102, 0, 0.8),
+                inset 0 0 30px rgba(255, 255, 255, 0.5);
         }
 
         .config-panel {
-            background: rgba(255, 102, 0, 0.1);
-            border: 2px solid #ff6600;
-            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(255, 0, 0, 0.2), rgba(255, 102, 0, 0.2), rgba(255, 255, 0, 0.2));
+            border: 3px solid #ff6600;
+            padding: 2rem;
             margin: 1rem 0;
-            border-radius: 10px;
+            border-radius: 20px;
             width: 100%;
             max-width: 500px;
+            backdrop-filter: blur(20px);
+            box-shadow: 
+                0 0 40px rgba(255, 102, 0, 0.6),
+                inset 0 0 30px rgba(255, 255, 0, 0.2);
+            animation: border-rainbow 4s linear infinite;
+        }
+
+        @keyframes border-rainbow {
+            0% { border-color: #ff0000; box-shadow: 0 0 40px rgba(255, 0, 0, 0.8), inset 0 0 30px rgba(255, 0, 0, 0.3); }
+            25% { border-color: #ffff00; box-shadow: 0 0 40px rgba(255, 255, 0, 0.8), inset 0 0 30px rgba(255, 255, 0, 0.3); }
+            50% { border-color: #00ff00; box-shadow: 0 0 40px rgba(0, 255, 0, 0.8), inset 0 0 30px rgba(0, 255, 0, 0.3); }
+            75% { border-color: #0000ff; box-shadow: 0 0 40px rgba(0, 0, 255, 0.8), inset 0 0 30px rgba(0, 0, 255, 0.3); }
+            100% { border-color: #ff0000; box-shadow: 0 0 40px rgba(255, 0, 0, 0.8), inset 0 0 30px rgba(255, 0, 0, 0.3); }
         }
 
         .config-panel h3 {
-            margin-bottom: 1rem;
-            color: #ff6600;
+            color: #ffff00;
             text-align: center;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 20px #ff6600;
+            animation: pulse-color 1s infinite;
         }
 
         .config-panel input {
             width: 100%;
-            padding: 0.75rem;
+            padding: 0.9rem;
             margin: 0.5rem 0;
-            background: rgba(0, 0, 0, 0.5);
-            border: 2px solid #ff6600;
-            color: #ff6600;
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid #ff6600;
+            color: #ffff00;
             font-family: 'Courier New', monospace;
-            font-size: 1rem;
-            border-radius: 5px;
+            font-size: 1.1rem;
+            border-radius: 10px;
+            transition: all 0.3s;
         }
 
         .config-panel input:focus {
             outline: none;
-            border-color: #ff8800;
-            box-shadow: 0 0 10px rgba(255, 102, 0, 0.5);
+            border-color: #ffff00;
+            background: rgba(0, 0, 0, 0.9);
+            box-shadow: 
+                0 0 30px rgba(255, 255, 0, 0.8),
+                inset 0 0 20px rgba(255, 102, 0, 0.3);
+            transform: scale(1.02);
         }
 
         .config-panel label {
             display: block;
             margin-top: 1rem;
             color: #ffaa00;
-            font-size: 0.9rem;
+            font-size: 1rem;
+            text-shadow: 0 0 10px #ff6600;
         }
 
-        .waiting-animation {
-            font-size: 2rem;
-            margin: 2rem 0;
-            animation: waiting 1.5s infinite;
-        }
-
-        @keyframes waiting {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 1; }
-        }
-
-        /* Mobile optimizations */
-        @media (max-width: 768px) {
-            .health-bar-container {
-                width: 35%;
-                height: 30px;
-            }
-
-            .player-name {
-                font-size: 0.7rem;
-                bottom: 3px;
-            }
-
-            .controls {
-                font-size: 0.7rem;
-                padding: 0.4rem;
-                bottom: 10px;
-                left: 5px;
-            }
-
-            .config-panel {
-                padding: 1rem;
-            }
-
-            .btn {
-                min-width: 150px;
-                padding: 0.8rem 1.5rem;
-            }
+        .payment-box, .status-text {
+            animation: pulse-color 1.5s infinite;
         }
     </style>
 </head>
 <body>
-    <div id="game-container">
-        <canvas id="game-canvas"></canvas>
-        
-        <div id="ui-overlay">
-            <!-- Écran de configuration -->
-            <div id="config-screen" class="screen">
-                <div class="screen-content">
-                    <div class="title">⚡ LIGHTNING FIGHTER</div>
-                    <div class="subtitle">Combat Arcade Bitcoin</div>
+    <canvas id="game-canvas"></canvas>
+    
+    <div id="ui-overlay">
+        <div id="config-screen" class="screen">
+            <div class="screen-content">
+                <div class="title">⚡ LIGHTNING FIGHTER ⚡</div>
+                <div class="subtitle">Combat Arcade Bitcoin - ULTRA EDITION</div>
+                
+                <div class="config-panel">
+                    <h3>⚡ Configuration LNbits ⚡</h3>
                     
-                    <div class="config-panel">
-                        <h3>Configuration LNbits</h3>
-                        <label>URL LNbits:</label>
-                        <input type="text" id="lnbits-url" placeholder="https://legend.lnbits.com" value="https://legend.lnbits.com">
-                        
-                        <label>Admin Key:</label>
-                        <input type="password" id="admin-key" placeholder="Votre clé admin LNbits">
-                        
-                        <label>Invoice Key:</label>
-                        <input type="password" id="invoice-key" placeholder="Votre clé invoice LNbits">
-                        
-                        <label>Mise d'entrée (sats):</label>
-                        <input type="number" id="entry-fee" value="100" min="10">
-                    </div>
+                    <label>URL LNbits:</label>
+                    <input type="text" id="lnbits-url" placeholder="https://legend.lnbits.com" value="https://legend.lnbits.com">
                     
-                    <button class="btn" onclick="saveConfig()">ENREGISTRER</button>
+                    <label>Invoice Key:</label>
+                    <input type="password" id="invoice-key" placeholder="Clé Invoice">
+                    
+                    <label>Admin Key:</label>
+                    <input type="password" id="admin-key" placeholder="Clé Admin">
+                    
+                    <label>Mise d'entrée (sats):</label>
+                    <input type="number" id="entry-fee" value="100" min="10">
                 </div>
-            </div>
-
-            <!-- Écran d'accueil -->
-            <div id="start-screen" class="screen hidden">
-                <div class="screen-content">
-                    <div class="title">⚡ LIGHTNING FIGHTER</div>
-                    <div class="subtitle">Payez pour jouer • Gagnez 75% du pot</div>
-                    <button class="btn" onclick="initPayment()">PAYER & JOUER</button>
-                    <div class="status-text">Mise: <span id="entry-amount">100</span> sats</div>
-                </div>
-            </div>
-
-            <!-- Écran de paiement -->
-            <div id="payment-screen" class="screen hidden">
-                <div class="screen-content">
-                    <div class="title">Paiement Lightning</div>
-                    <div class="payment-box">
-                        <div class="status-text">Scannez le QR code pour payer</div>
-                        <div id="qr-code"></div>
-                        <div class="status-text" id="payment-status">En attente du paiement...</div>
-                        <div class="status-text">Montant: <span id="payment-amount">100</span> sats</div>
-                    </div>
-                    <button class="btn" onclick="cancelPayment()">ANNULER</button>
-                </div>
-            </div>
-
-            <!-- Écran de matchmaking -->
-            <div id="matchmaking-screen" class="screen hidden">
-                <div class="screen-content">
-                    <div class="title">Recherche d'adversaire</div>
-                    <div class="waiting-animation">⚡ ⚔️ ⚡</div>
-                    <div class="status-text">En attente d'un autre joueur...</div>
-                    <div class="status-text" id="matchmaking-status">Joueurs en ligne: 1/2</div>
-                </div>
-            </div>
-
-            <!-- HUD de combat -->
-            <div id="combat-hud" class="screen hidden" style="background: transparent; backdrop-filter: none; pointer-events: none;">
-                <div class="health-bar-container" id="player1-health" style="pointer-events: none;">
-                    <div class="health-bar" id="p1-bar"></div>
-                    <div class="player-name">JOUEUR 1</div>
-                </div>
-                <div class="health-bar-container" id="player2-health" style="pointer-events: none;">
-                    <div class="health-bar" id="p2-bar"></div>
-                    <div class="player-name">JOUEUR 2</div>
-                </div>
-                <div class="timer" id="fight-timer">60</div>
-                <div class="controls">
-                    <div><strong>CONTRÔLES:</strong></div>
-                    <div>ZQSD - Déplacement</div>
-                    <div>ESPACE - Attaque</div>
-                    <div>SHIFT - Défense</div>
-                </div>
-            </div>
-
-            <!-- Écran de victoire -->
-            <div id="victory-screen" class="screen hidden">
-                <div class="screen-content">
-                    <div class="winner-announcement" id="winner-text">VICTOIRE!</div>
-                    <div class="subtitle">Combat terminé</div>
-                    <div class="prize-amount" id="prize-text">+150 sats</div>
-                    <div class="payment-box">
-                        <div class="status-text" id="payout-status">Paiement en cours...</div>
-                    </div>
-                    <button class="btn" onclick="restartGame()">REJOUER</button>
-                </div>
+                
+                <button class="btn" onclick="saveConfig()">🚀 LANCER 🚀</button>
             </div>
         </div>
     </div>
 
-    <!-- Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    
-    <!-- QR Code Generator -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <script>
-        // Configuration
+        let scene, camera, renderer;
+        let particles = [];
+        let bitcoinSymbol;
+        let explosionParticles = [];
+        let laserBeams = [];
         let CONFIG = {
             lnbitsUrl: '',
             adminKey: '',
             invoiceKey: '',
-            entryFee: 100,
-            prizePercentage: 0.75
+            entryFee: 100
         };
-
-        // État du jeu
-        let gameState = {
-            currentScreen: 'config',
-            paymentHash: null,
-            playerId: null,
-            matchId: null,
-            player1Health: 100,
-            player2Health: 100,
-            fightTime: 60,
-            isPlayer1: true
-        };
-
-        // Three.js setup
-        let scene, camera, renderer;
-        let player1, player2;
-        let keys = {};
 
         function initThreeJS() {
             const canvas = document.getElementById('game-canvas');
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0a0a0a);
-            scene.fog = new THREE.Fog(0x0a0a0a, 10, 50);
-
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 5, 15);
-            camera.lookAt(0, 2, 0);
-
-            renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.shadowMap.enabled = true;
-
-            // Lumières
-            const ambientLight = new THREE.AmbientLight(0xff6600, 0.3);
-            scene.add(ambientLight);
-
-            const spotLight = new THREE.SpotLight(0xff6600, 1);
-            spotLight.position.set(0, 20, 0);
-            spotLight.castShadow = true;
-            scene.add(spotLight);
-
-            const pointLight1 = new THREE.PointLight(0xff0000, 1, 50);
-            pointLight1.position.set(-10, 5, 0);
-            scene.add(pointLight1);
-
-            const pointLight2 = new THREE.PointLight(0x0000ff, 1, 50);
-            pointLight2.position.set(10, 5, 0);
-            scene.add(pointLight2);
-
-            // Sol cyberpunk
-            const floorGeometry = new THREE.PlaneGeometry(30, 30, 20, 20);
-            const floorMaterial = new THREE.MeshStandardMaterial({
-                color: 0x111111,
-                wireframe: true,
-                emissive: 0xff6600,
-                emissiveIntensity: 0.2
-            });
-            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-            floor.rotation.x = -Math.PI / 2;
-            floor.receiveShadow = true;
-            scene.add(floor);
-
-            // Créer les joueurs
-            createPlayers();
-
-            // Murs d'arène
-            createArena();
-
-            window.addEventListener('resize', onWindowResize);
-            document.addEventListener('keydown', (e) => keys[e.key.toLowerCase()] = true);
-            document.addEventListener('keyup', (e) => keys[e.key.toLowerCase()] = false);
-        }
-
-        function createPlayers() {
-            // Joueur 1 (Rouge)
-            const geometry1 = new THREE.BoxGeometry(1, 2, 1);
-            const material1 = new THREE.MeshPhongMaterial({
-                color: 0xff0000,
-                emissive: 0xff0000,
-                emissiveIntensity: 0.3
-            });
-            player1 = new THREE.Mesh(geometry1, material1);
-            player1.position.set(-5, 1, 0);
-            player1.castShadow = true;
-            scene.add(player1);
-
-            // Tête joueur 1
-            const head1 = new THREE.SphereGeometry(0.5, 16, 16);
-            const headMesh1 = new THREE.Mesh(head1, material1);
-            headMesh1.position.y = 1.5;
-            player1.add(headMesh1);
-
-            // Joueur 2 (Bleu)
-            const material2 = new THREE.MeshPhongMaterial({
-                color: 0x0000ff,
-                emissive: 0x0000ff,
-                emissiveIntensity: 0.3
-            });
-            player2 = new THREE.Mesh(geometry1, material2);
-            player2.position.set(5, 1, 0);
-            player2.castShadow = true;
-            scene.add(player2);
-
-            // Tête joueur 2
-            const headMesh2 = new THREE.Mesh(head1, material2);
-            headMesh2.position.y = 1.5;
-            player2.add(headMesh2);
-        }
-
-        function createArena() {
-            const wallMaterial = new THREE.MeshPhongMaterial({
-                color: 0x222222,
-                emissive: 0xff6600,
-                emissiveIntensity: 0.1,
-                transparent: true,
-                opacity: 0.3
-            });
-
-            // Murs
-            const wallGeometry = new THREE.BoxGeometry(30, 5, 0.5);
             
-            const wall1 = new THREE.Mesh(wallGeometry, wallMaterial);
-            wall1.position.set(0, 2.5, -15);
-            scene.add(wall1);
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 30;
 
-            const wall2 = new THREE.Mesh(wallGeometry, wallMaterial);
-            wall2.position.set(0, 2.5, 15);
-            scene.add(wall2);
-
-            const sideWallGeometry = new THREE.BoxGeometry(0.5, 5, 30);
-            const wall3 = new THREE.Mesh(sideWallGeometry, wallMaterial);
-            wall3.position.set(-15, 2.5, 0);
-            scene.add(wall3);
-
-            const wall4 = new THREE.Mesh(sideWallGeometry, wallMaterial);
-            wall4.position.set(15, 2.5, 0);
-            scene.add(wall4);
-        }
-
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
+            renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
+
+            // EFFETS MEGA VISIBLES !
+            createMegaBitcoin();
+            createExplosiveParticles();
+            createRainbowLasers();
+            createTunnel();
+            createFloatingShapes();
+            
+            animate();
         }
 
-        // LNbits API
-        async function callLNbitsAPI(endpoint, method = 'GET', data = null, useAdminKey = false) {
-            const headers = {
-                'X-Api-Key': useAdminKey ? CONFIG.adminKey : CONFIG.invoiceKey,
-                'Content-Type': 'application/json'
-            };
-
-            const options = {
-                method,
-                headers
-            };
-
-            if (data) {
-                options.body = JSON.stringify(data);
-            }
-
-            try {
-                const response = await fetch(`${CONFIG.lnbitsUrl}${endpoint}`, options);
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('Erreur API:', errorText);
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return await response.json();
-            } catch (error) {
-                console.error('Erreur API LNbits:', error);
-                alert('Erreur de connexion à LNbits. Vérifiez votre configuration et votre connexion réseau.');
-                return null;
-            }
-        }
-
-        async function createInvoice(amount, memo) {
-            return await callLNbitsAPI('/api/v1/payments', 'POST', {
-                out: false,
-                amount: amount,
-                memo: memo,
-                expiry: 600
-            }, false);
-        }
-
-        async function checkInvoice(paymentHash) {
-            return await callLNbitsAPI(`/api/v1/payments/${paymentHash}`, 'GET');
-        }
-
-        async function payInvoice(bolt11) {
-            return await callLNbitsAPI('/api/v1/payments', 'POST', {
-                out: true,
-                bolt11: bolt11
-            }, true);
-        }
-
-        // Gestion des écrans
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(screen => {
-                screen.classList.add('hidden');
+        function createMegaBitcoin() {
+            const group = new THREE.Group();
+            
+            // BITCOIN GÉANT avec couleurs arc-en-ciel
+            const ringGeo = new THREE.TorusGeometry(8, 1, 16, 100);
+            const ringMat = new THREE.MeshBasicMaterial({
+                color: 0xff0000,
+                wireframe: false
             });
-            document.getElementById(screenId).classList.remove('hidden');
-            gameState.currentScreen = screenId;
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            group.add(ring);
+
+            // Symbole B ÉNORME
+            const barGeo = new THREE.BoxGeometry(1.5, 12, 1.5);
+            const barMat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+            
+            const bar1 = new THREE.Mesh(barGeo, barMat);
+            bar1.position.x = -3;
+            group.add(bar1);
+
+            // Barres horizontales
+            const hBarGeo = new THREE.BoxGeometry(6, 1.5, 1.5);
+            [-4, 0, 4].forEach(y => {
+                const hBar = new THREE.Mesh(hBarGeo, barMat.clone());
+                hBar.position.set(1, y, 0);
+                group.add(hBar);
+            });
+
+            // Points lumineux GÉANTS
+            for (let i = 0; i < 12; i++) {
+                const angle = (i / 12) * Math.PI * 2;
+                const light = new THREE.PointLight(0xffffff, 3, 50);
+                light.position.set(
+                    Math.cos(angle) * 10,
+                    Math.sin(angle) * 10,
+                    0
+                );
+                group.add(light);
+                
+                const sphere = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.8, 16, 16),
+                    new THREE.MeshBasicMaterial({ color: 0xffff00 })
+                );
+                sphere.position.copy(light.position);
+                group.add(sphere);
+            }
+
+            bitcoinSymbol = group;
+            scene.add(group);
+        }
+
+        function createExplosiveParticles() {
+            // 500 PARTICULES ÉNORMES qui explosent
+            for (let i = 0; i < 500; i++) {
+                const geo = new THREE.SphereGeometry(Math.random() * 0.5 + 0.3, 8, 8);
+                const mat = new THREE.MeshBasicMaterial({
+                    color: new THREE.Color().setHSL(Math.random(), 1, 0.5)
+                });
+                const particle = new THREE.Mesh(geo, mat);
+                
+                particle.position.set(
+                    (Math.random() - 0.5) * 100,
+                    (Math.random() - 0.5) * 100,
+                    (Math.random() - 0.5) * 100
+                );
+                
+                particle.velocity = new THREE.Vector3(
+                    (Math.random() - 0.5) * 2,
+                    (Math.random() - 0.5) * 2,
+                    (Math.random() - 0.5) * 2
+                );
+                
+                particles.push(particle);
+                scene.add(particle);
+            }
+        }
+
+        function createRainbowLasers() {
+            // 20 LASERS arc-en-ciel
+            for (let i = 0; i < 20; i++) {
+                const points = [
+                    new THREE.Vector3((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, -50),
+                    new THREE.Vector3((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, 50)
+                ];
+                
+                const geo = new THREE.BufferGeometry().setFromPoints(points);
+                const mat = new THREE.LineBasicMaterial({
+                    color: new THREE.Color().setHSL(i / 20, 1, 0.5),
+                    linewidth: 5
+                });
+                
+                const laser = new THREE.Line(geo, mat);
+                laser.userData.angle = i;
+                laserBeams.push(laser);
+                scene.add(laser);
+            }
+        }
+
+        function createTunnel() {
+            // Tunnel de cercles
+            for (let i = 0; i < 30; i++) {
+                const ringGeo = new THREE.TorusGeometry(20 + i * 2, 0.5, 8, 32);
+                const ringMat = new THREE.MeshBasicMaterial({
+                    color: new THREE.Color().setHSL(i / 30, 1, 0.5),
+                    wireframe: true
+                });
+                const ring = new THREE.Mesh(ringGeo, ringMat);
+                ring.position.z = -i * 5 - 50;
+                ring.userData.originalZ = ring.position.z;
+                particles.push(ring);
+                scene.add(ring);
+            }
+        }
+
+        function createFloatingShapes() {
+            // Formes géométriques qui flottent
+            const shapes = [
+                new THREE.BoxGeometry(3, 3, 3),
+                new THREE.OctahedronGeometry(2),
+                new THREE.TetrahedronGeometry(2),
+                new THREE.IcosahedronGeometry(2)
+            ];
+
+            for (let i = 0; i < 50; i++) {
+                const geo = shapes[Math.floor(Math.random() * shapes.length)];
+                const mat = new THREE.MeshBasicMaterial({
+                    color: new THREE.Color().setHSL(Math.random(), 1, 0.5),
+                    wireframe: true
+                });
+                const shape = new THREE.Mesh(geo, mat);
+                
+                shape.position.set(
+                    (Math.random() - 0.5) * 80,
+                    (Math.random() - 0.5) * 80,
+                    (Math.random() - 0.5) * 80
+                );
+                
+                shape.rotation.set(
+                    Math.random() * Math.PI,
+                    Math.random() * Math.PI,
+                    Math.random() * Math.PI
+                );
+                
+                particles.push(shape);
+                scene.add(shape);
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const time = Date.now() * 0.001;
+
+            // BITCOIN tourne VITE avec arc-en-ciel
+            if (bitcoinSymbol) {
+                bitcoinSymbol.rotation.y += 0.03;
+                bitcoinSymbol.rotation.x += 0.02;
+                bitcoinSymbol.scale.set(
+                    1 + Math.sin(time * 2) * 0.3,
+                    1 + Math.cos(time * 2) * 0.3,
+                    1
+                );
+                
+                // Changement de couleur arc-en-ciel
+                const hue = (time * 0.5) % 1;
+                bitcoinSymbol.children.forEach(child => {
+                    if (child.material) {
+                        child.material.color.setHSL(hue, 1, 0.5);
+                    }
+                });
+            }
+
+            // Particules EXPLOSENT et bougent VITE
+            particles.forEach((p, i) => {
+                if (p.velocity) {
+                    p.position.add(p.velocity);
+                    
+                    // Rebond
+                    if (Math.abs(p.position.x) > 50) p.velocity.x *= -1;
+                    if (Math.abs(p.position.y) > 50) p.velocity.y *= -1;
+                    if (Math.abs(p.position.z) > 50) p.velocity.z *= -1;
+                }
+                
+                // Rotation rapide
+                p.rotation.x += 0.05;
+                p.rotation.y += 0.05;
+                
+                // Couleur arc-en-ciel
+                const hue = ((time + i * 0.1) * 0.3) % 1;
+                if (p.material) {
+                    p.material.color.setHSL(hue, 1, 0.5);
+                }
+
+                // Tunnel effect
+                if (p.userData.originalZ !== undefined) {
+                    p.position.z += 2;
+                    if (p.position.z > 50) {
+                        p.position.z = -150;
+                    }
+                }
+            });
+
+            // LASERS tournent VITE
+            laserBeams.forEach((laser, i) => {
+                laser.rotation.z += 0.05;
+                const hue = ((time + i * 0.05) * 0.5) % 1;
+                laser.material.color.setHSL(hue, 1, 0.5);
+            });
+
+            // Caméra bouge
+            camera.position.x = Math.sin(time) * 10;
+            camera.position.y = Math.cos(time * 0.7) * 10;
+            camera.lookAt(0, 0, 0);
+
+            renderer.render(scene, camera);
         }
 
         function saveConfig() {
@@ -650,213 +514,32 @@
             CONFIG.invoiceKey = document.getElementById('invoice-key').value.trim();
             CONFIG.entryFee = parseInt(document.getElementById('entry-fee').value);
 
-            // Retirer le trailing slash si présent
-            if (CONFIG.lnbitsUrl.endsWith('/')) {
-                CONFIG.lnbitsUrl = CONFIG.lnbitsUrl.slice(0, -1);
-            }
-
             if (!CONFIG.lnbitsUrl || !CONFIG.adminKey || !CONFIG.invoiceKey) {
-                alert('Veuillez remplir tous les champs');
-                return;
-            }
-
-            if (CONFIG.entryFee < 10) {
-                alert('La mise minimum est de 10 sats');
+                alert('Remplis tous les champs !');
                 return;
             }
 
             localStorage.setItem('lightningFighterConfig', JSON.stringify(CONFIG));
-            document.getElementById('entry-amount').textContent = CONFIG.entryFee;
-            showScreen('start-screen');
+            alert('Config sauvegardée ! Paiement Lightning sera implémenté dans la version finale.');
         }
 
-        async function initPayment() {
-            showScreen('payment-screen');
-            document.getElementById('payment-amount').textContent = CONFIG.entryFee;
-
-            // Créer une invoice
-            const invoice = await createInvoice(CONFIG.entryFee, 'Lightning Fighter - Entrée combat');
-            
-            if (!invoice) {
-                showScreen('start-screen');
-                return;
-            }
-
-            gameState.paymentHash = invoice.payment_hash;
-
-            // Générer QR code
-            const qrContainer = document.getElementById('qr-code');
-            qrContainer.innerHTML = '';
-            new QRCode(qrContainer, {
-                text: invoice.payment_request,
-                width: 256,
-                height: 256,
-                correctLevel: QRCode.CorrectLevel.M
-            });
-
-            // Surveiller le paiement
-            checkPaymentStatus();
-        }
-
-        async function checkPaymentStatus() {
-            if (gameState.currentScreen !== 'payment-screen') return;
-
-            const payment = await checkInvoice(gameState.paymentHash);
-            
-            if (payment && payment.paid) {
-                document.getElementById('payment-status').textContent = '✓ Paiement confirmé!';
-                setTimeout(() => {
-                    gameState.playerId = 'player_' + Date.now();
-                    startMatchmaking();
-                }, 1000);
-            } else {
-                setTimeout(checkPaymentStatus, 2000);
-            }
-        }
-
-        function cancelPayment() {
-            gameState.paymentHash = null;
-            showScreen('start-screen');
-        }
-
-        function startMatchmaking() {
-            showScreen('matchmaking-screen');
-            
-            // Simulation du matchmaking (dans une vraie app, utiliser WebSocket)
-            setTimeout(() => {
-                gameState.matchId = 'match_' + Date.now();
-                startFight();
-            }, 3000);
-        }
-
-        function startFight() {
-            showScreen('combat-hud');
-            gameState.player1Health = 100;
-            gameState.player2Health = 100;
-            gameState.fightTime = 60;
-            
-            updateHealthBars();
-            startFightTimer();
-            startGameLoop();
-        }
-
-        function startFightTimer() {
-            const timerInterval = setInterval(() => {
-                gameState.fightTime--;
-                document.getElementById('fight-timer').textContent = gameState.fightTime;
-
-                if (gameState.fightTime <= 0 || gameState.player1Health <= 0 || gameState.player2Health <= 0) {
-                    clearInterval(timerInterval);
-                    endFight();
-                }
-            }, 1000);
-        }
-
-        function updateHealthBars() {
-            const p1Health = Math.max(0, gameState.player1Health);
-            const p2Health = Math.max(0, gameState.player2Health);
-            document.getElementById('p1-bar').style.width = p1Health + '%';
-            document.getElementById('p2-bar').style.width = p2Health + '%';
-        }
-
-        function startGameLoop() {
-            function animate() {
-                if (gameState.currentScreen !== 'combat-hud') return;
-
-                requestAnimationFrame(animate);
-
-                // Contrôles joueur 1 (ZQSD)
-                const speed = 0.2;
-                if (keys['z'] && player1.position.z > -14) player1.position.z -= speed;
-                if (keys['s'] && player1.position.z < 14) player1.position.z += speed;
-                if (keys['q'] && player1.position.x > -14) player1.position.x -= speed;
-                if (keys['d'] && player1.position.x < 14) player1.position.x += speed;
-
-                // IA simple pour joueur 2
-                const dx = player1.position.x - player2.position.x;
-                const dz = player1.position.z - player2.position.z;
-                const distance = Math.sqrt(dx * dx + dz * dz);
-
-                if (distance > 3) {
-                    player2.position.x += (dx / distance) * speed * 0.5;
-                    player2.position.z += (dz / distance) * speed * 0.5;
-                }
-
-                // Rotation vers l'adversaire
-                player1.lookAt(player2.position);
-                player2.lookAt(player1.position);
-
-                // Détection d'attaque (ESPACE)
-                if (keys[' '] && distance < 3) {
-                    if (Math.random() > 0.9) {
-                        gameState.player2Health -= 2;
-                        updateHealthBars();
-                    }
-                }
-
-                // IA attaque
-                if (distance < 3 && Math.random() > 0.95) {
-                    gameState.player1Health -= 2;
-                    updateHealthBars();
-                }
-
-                renderer.render(scene, camera);
-            }
-
-            animate();
-        }
-
-        async function endFight() {
-            const player1Won = gameState.player1Health > gameState.player2Health;
-            const isWinner = gameState.isPlayer1 === player1Won;
-
-            if (isWinner) {
-                const prizeAmount = Math.floor(CONFIG.entryFee * 2 * CONFIG.prizePercentage);
-                
-                showScreen('victory-screen');
-                document.getElementById('winner-text').textContent = 'VICTOIRE!';
-                document.getElementById('prize-text').textContent = `+${prizeAmount} sats`;
-                
-                // Simuler le paiement du gagnant
-                document.getElementById('payout-status').textContent = '✓ Paiement envoyé à votre wallet!';
-                
-            } else {
-                showScreen('victory-screen');
-                document.getElementById('winner-text').textContent = 'DÉFAITE';
-                document.getElementById('prize-text').textContent = '0 sats';
-                document.getElementById('payout-status').textContent = 'Meilleure chance la prochaine fois!';
-            }
-        }
-
-        function restartGame() {
-            showScreen('start-screen');
-        }
-
-        // Initialisation
         window.addEventListener('load', () => {
             initThreeJS();
             
-            // Charger la config sauvegardée
-            const savedConfig = localStorage.getItem('lightningFighterConfig');
-            if (savedConfig) {
-                const config = JSON.parse(savedConfig);
+            const saved = localStorage.getItem('lightningFighterConfig');
+            if (saved) {
+                const config = JSON.parse(saved);
                 document.getElementById('lnbits-url').value = config.lnbitsUrl;
                 document.getElementById('admin-key').value = config.adminKey;
                 document.getElementById('invoice-key').value = config.invoiceKey;
                 document.getElementById('entry-fee').value = config.entryFee;
             }
+        });
 
-            // Render loop pour le fond
-            function renderBackground() {
-                if (gameState.currentScreen === 'combat-hud') return;
-                
-                requestAnimationFrame(renderBackground);
-                
-                // Animation du fond
-                scene.rotation.y += 0.001;
-                renderer.render(scene, camera);
-            }
-            renderBackground();
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
         });
     </script>
 </body>
